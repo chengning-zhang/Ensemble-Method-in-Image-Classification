@@ -4,6 +4,9 @@ from keras.models import load_model
 import numpy as np
 import sys
 
+from keras.models import Sequential
+from keras.layers import Dense
+
 def mostcommon(array):
     '''return the most common value of an array'''
     return np.bincount(array).argmax()
@@ -188,11 +191,47 @@ def test1():
     bagging_unique_model(n_learners, epochs_lst, batch_size, votefuns)
 
 def test2():
-    n_learners = 3
+    # n_learners = 2
     votefuns = [weighted_vote,  majority_vote]
     # saved_model_files = ['saved_models/callback-save-30-0.77.hdf5', 'saved_models/callback-save-45-0.77.hdf5',
     #        'saved_models/callback-save-60-0.78.hdf5']
+    # keras_cifar10_trained_model_4.h5
+    saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
+    n_learners = len(saved_model_files)
     ensemble_loading_model(n_learners, saved_model_files, votefuns)
+
+def stack(saved_model_files):
+    '''stacking multiple saved models'''
+    num_classes = 10
+    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    y_test_old = y_test[:] # save for error calculation
+    y_train_old = y_train[:]
+    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
+
+    models = []
+    n_trains = x_train.shape[0]
+    n_tests = x_test.shape[0]
+    accuracy_records = []
+    n_learners = len(saved_model_files)
+    for i in range(n_learners):
+        model_file = saved_model_files[i]
+        model = load_model(model_file)
+        print("model " + str(i))
+        scores = evaluate(model, x_test, y_test)
+        accuracy_records.append(scores[1])
+        models.append(model) # save base learner
+    # construct meta learning problem
+    meta_x_train = np.zeros((n_trains, n_learners*num_classes), dtype="float32")
+    meta_x_test = np.zeros((n_tests, n_learners*num_classes), dtype="float32")
+    for i in range(n_learners):
+        meta_x_train[:, i*num_classes:i*num_classes + num_classes] = models[i].predict(x_train, verbose=0)
+        meta_x_test[:, i*num_classes:i*num_classes + num_classes] = models[i].predict(x_test, verbose=0)
+    meta_y_train = y_train # use one hot encode
+    meta_y_test = y_test
+    super_model = meta_model(n_learners, num_classes)
+    super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=100, validation_data=(meta_x_test, meta_y_test), shuffle=True)
+    scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
+    print('Test accuracy: ', scores[1])
 
 def test3():
     n_learners = 5
@@ -201,11 +240,22 @@ def test3():
     votefuns = [weighted_vote,  majority_vote]
     bagging_unique_model(n_learners, epochs_lst, batch_size, votefuns)
 
+def meta_model(n_learners, num_classes):
+    # create model
+    model = Sequential()
+    in_dim = n_learners * num_classes
+    print(in_dim)
+    model.add(Dense(n_learners*num_classes, input_dim = in_dim, activation='relu'))
+    model.add(Dense(num_classes, activation='softmax'))
+    # compile model
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model
+
 if __name__ == "__main__":
     print("Hello UW!")
     # test1() # bagging for three learners
     # test2() # load saved models
-    test3() # bagging for five learners
+    # test3() # bagging for five learners
     # adaboost for multiple classification
     '''
     n_learners = 3
@@ -213,3 +263,5 @@ if __name__ == "__main__":
     batch_size = 32
     adaboost(n_learners, epochs_lst, batch_size)
     '''
+    saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
+    stack(saved_model_files)
