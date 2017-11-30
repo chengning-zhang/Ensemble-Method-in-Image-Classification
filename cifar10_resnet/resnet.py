@@ -110,7 +110,7 @@ def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epoc
             min_lr=0.5e-6)
 
     callbacks = [checkpoint, lr_reducer, lr_scheduler]
-    
+
     # callbacks  = snapshot.get_callbacks(model_prefix="ResNet-snap-") # try snapshot callback
 
     # Run training, with or without data augmentation.

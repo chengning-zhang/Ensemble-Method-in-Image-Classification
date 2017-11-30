@@ -251,11 +251,21 @@ def meta_model(n_learners, num_classes):
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
 
+# def train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, M, alpha_zero, data_augmentation=True):
+def snapshot_ensemble(epochs, batch_size, M, alpha_zero):
+    num_classes = 10
+    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    y_test_old = y_test[:] # save for error calculation
+    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
+    model = build_model(x_train, num_classes)
+    train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, M, alpha_zero, data_augmentation=True)
+
 if __name__ == "__main__":
     print("Hello UW!")
     # test1() # bagging for three learners
     # test2() # load saved models
     # test3() # bagging for five learners
+
     # adaboost for multiple classification
     '''
     n_learners = 3
@@ -263,5 +273,18 @@ if __name__ == "__main__":
     batch_size = 32
     adaboost(n_learners, epochs_lst, batch_size)
     '''
+    # stack with saved models
+    '''
     saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
     stack(saved_model_files)
+    '''
+    # snapshot cnn
+    epochs = 20
+    M = 2
+    alpha_zero = 0.0001
+    batch_size = 32
+    # snapshot_ensemble(epochs, batch_size, M, alpha_zero)
+    saved_model_files = ['weights/cnn-snapshot--1.h5', 'weights/cnn-snapshot--2.h5']
+    stack(saved_model_files)
+
+
