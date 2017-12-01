@@ -70,7 +70,7 @@ def preprocess(x_train, y_train, x_test, y_test, substract_pixel_mean = True):
     return (x_train, y_train), (x_test, y_test), input_shape
 
 # build resnet model
-def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation):
+def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation=True):
     # prepare variables for snapshots ensemble
     # T = epochs
     # M = 3

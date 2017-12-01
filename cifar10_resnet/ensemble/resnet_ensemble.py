@@ -46,14 +46,15 @@ def cross_validation():
     '''use different parameters and pick the best one to be the final learner'''
     pass
 
-def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.txt", file_prefix=""):
+def adaboost(version, n, n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.txt", file_prefix=""):
     ''' adaboost of multi classification'''
     num_classes = 10
     K = float(num_classes)
+    data_augmentation = True
     (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     y_train_old = y_train[:]
-    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
+    (x_train, y_train), (x_test, y_test), input_shape = preprocess(x_train, y_train, x_test, y_test)
     models = []
     n_trains = x_train.shape[0]
     n_tests = x_test.shape[0]
@@ -67,13 +68,14 @@ def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.
         sum_weights = sum(weights)
         weights = [weight/sum_weights for weight in weights]
         epochs = epochs_lst[i]
-        model = build_model(x_train, num_classes)
+        # model = build_model(x_train, num_classes)
 
         train_picks = np.random.choice(n_trains, M, weights)
 
         x_train_i = x_train[train_picks, :]
         y_train_i = y_train[train_picks, :]
-        model, history = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
+        model, history = build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
+        # model, history = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
         print("model " + str(i))
         predicts = predict(model, x_train_i)
         y_ref = y_train_old[train_picks, :].reshape((M, ))
@@ -374,25 +376,25 @@ def snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epoch
     snapshot_train_model(epochs, batch_size, M, alpha_zero, name_prefix)
     saved_model_files = []
     for i in range(M):
-        saved_model_files.append("snapshot_models/cnn-snapshot-" + str(i+1) + ".h5")
+        saved_model_files.append("snapshot_models/resnet-snapshot-" + str(i+1) + ".h5")
     print(saved_model_files)
-    stack_loading_model(saved_model_files, meta_epochs, filename="cnn-snapshot.txt")
+    stack_loading_model(saved_model_files, meta_epochs, filename="resnet-snapshot.txt")
 
 if __name__ == "__main__":
     print("Hello UW!")
     # # bagging
     # test1() # bagging for three learners
-    test2() # load saved models
+    # test2() # load saved models
     # test3() # bagging for five learners
 
-    '''
     # adaboost for multiple classification
     n_learners = 3
     epochs_lst = [1, 1, 1]
     batch_size = 32
     sample_ratio = 3
-    adaboost(n_learners, epochs_lst, batch_size, sample_ratio, "cnn-adaboost.txt")
-    '''
+    version = 1
+    n = 3
+    adaboost(version, n, n_learners, epochs_lst, batch_size, sample_ratio, "resnet-adaboost.txt")
 
     '''
     # stack with saved models
