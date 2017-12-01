@@ -94,6 +94,7 @@ def adaboost(n_learners, epochs_lst, batch_size):
     print('ensemble test accuracy: %f %%' % ((n_tests - errors)/float(n_tests)*100))
     for i in range(n_learners):
         print("learner %d: %0.6f" % (i, accuracy_records[i]))
+
     # for i in range(n_learners):
     #    for j in range(i+1, n_learners):
     #        print("the diversity between %d and %d is %f" %(i, j, diversity(x_test, y_test, y_test_old, models[i], models[j])))
@@ -114,7 +115,7 @@ def diversity(x_data, y_data, y_data_old, model1, model2):
     diver = combined_acc - max(accuracy1, accuracy2)
     return diver
 
-def bagging_unique_model(n_learners, epochs_lst, batch_size, votefuns, filename="temp.txt", file_prefix=""):
+def bagging_unique_model(n_learners, epochs_lst, batch_size, votefuns):
     '''bagging, use unique model, can use multiple vote functions, votefuns are vote
        functions list
     '''
@@ -126,44 +127,29 @@ def bagging_unique_model(n_learners, epochs_lst, batch_size, votefuns, filename=
     models = []
     n_trains = x_train.shape[0]
     n_tests = x_test.shape[0]
-    train_accuracy_records = []
-    test_accuracy_records = []
+    accuracy_records = []
     for i in range(n_learners):
         epochs = epochs_lst[i]
         model = build_model(x_train, num_classes)
         train_picks = np.random.choice(n_trains, n_trains)
         x_train_i = x_train[train_picks, :]
         y_train_i = y_train[train_picks, :]
-        model, history = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
-        print("model %d finished" % (i))
-        # print("model " + str(i))
-        # scores = evaluate(model, x_train, y_train)
-        # train_accuracy_records.append(scores[1])
-        # scores = evaluate(model, x_test, y_test)
-        # test_accuracy_records.append(scores[1])
-        train_accuracy_records.append(history.history['acc'][-1])
-        test_accuracy_records.append(history.history['val_acc'][-1])
+        model = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
+        print("model " + str(i))
+        scores = evaluate(model, x_test, y_test)
+        accuracy_records.append(scores[1])
         models.append(model) # save base learner
 
-    filename = file_prefix + filename
-    print(filename)
-    out_file = open(filename, "a")
-    out_file.write("--------------------------------------------\n")
     for votefun in votefuns:
         # get weighted vote or majority vote based on the votefun
-        final_predict = votefun(x_test, models, train_accuracy_records)
+        final_predict = votefun(x_test, models, accuracy_records)
 
         errors = np.count_nonzero(final_predict.reshape((n_tests, )) - y_test_old.reshape((n_tests,)))
-        out_file.write("votefun is\n")
-        out_file.write(str(votefun) + "\n")
-        out_file.write('ensemble test accuracy: %0.6f \n' % ((n_tests - errors)/float(n_tests)))
         print("votefun is ")
         print(votefun)
-        print('ensemble test accuracy: %0.6f' % ((n_tests - errors)/float(n_tests)))
+        print('ensemble test accuracy: %f %%' % ((n_tests - errors)/float(n_tests)*100))
         for i in range(n_learners):
-            print("learner %d (epochs = %d): %0.6f" % (i, epochs_lst[i], test_accuracy_records[i]))
-            out_file.write("learner %d (epochs = %d): %0.6f\n" % (i, epochs_lst[i], test_accuracy_records[i]))
-    out_file.close()
+            print("learner %d (epochs = %d): %0.6f" % (i, epochs_lst[i], accuracy_records[i]))
 
 def ensemble_loading_model(n_learners, saved_model_files, votefuns):
     '''load models from saved files
@@ -182,8 +168,7 @@ def ensemble_loading_model(n_learners, saved_model_files, votefuns):
         model_file = saved_model_files[i]
         model = load_model(model_file)
         print("model " + str(i))
-        # scores = evaluate(model, x_test, y_test)
-        scores = evaluate(model, x_train, y_train)
+        scores = evaluate(model, x_test, y_test)
         accuracy_records.append(scores[1])
         models.append(model) # save base learner
 
@@ -198,6 +183,22 @@ def ensemble_loading_model(n_learners, saved_model_files, votefuns):
         for i in range(n_learners):
             print("learner %d: %0.6f" % (i, accuracy_records[i]))
 
+def test1():
+    n_learners = 3
+    batch_size = 32
+    epochs_lst = [1, 1, 1]
+    votefuns = [weighted_vote,  majority_vote]
+    bagging_unique_model(n_learners, epochs_lst, batch_size, votefuns)
+
+def test2():
+    # n_learners = 2
+    votefuns = [weighted_vote,  majority_vote]
+    # saved_model_files = ['saved_models/callback-save-30-0.77.hdf5', 'saved_models/callback-save-45-0.77.hdf5',
+    #        'saved_models/callback-save-60-0.78.hdf5']
+    # keras_cifar10_trained_model_4.h5
+    saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
+    n_learners = len(saved_model_files)
+    ensemble_loading_model(n_learners, saved_model_files, votefuns)
 
 def stack(saved_model_files):
     '''stacking multiple saved models'''
@@ -216,8 +217,7 @@ def stack(saved_model_files):
         model_file = saved_model_files[i]
         model = load_model(model_file)
         print("model " + str(i))
-        # scores = evaluate(model, x_test, y_test)
-        scores = evaluate(model, x_train, y_train)
+        scores = evaluate(model, x_test, y_test)
         accuracy_records.append(scores[1])
         models.append(model) # save base learner
     # construct meta learning problem
@@ -229,31 +229,9 @@ def stack(saved_model_files):
     meta_y_train = y_train # use one hot encode
     meta_y_test = y_test
     super_model = meta_model(n_learners, num_classes)
-    # callbacks
-    filepath="callback-save-{epoch:02d}-{val_acc:.2f}.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
-    callbacks_list = [checkpoint]
-
-    super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=100, validation_data=(meta_x_test, meta_y_test), shuffle=True, callbacks=callbacks_list)
+    super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=100, validation_data=(meta_x_test, meta_y_test), shuffle=True)
     scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
     print('Test accuracy: ', scores[1])
-
-def test1():
-    n_learners = 3
-    batch_size = 32
-    epochs_lst = [1, 1, 1]
-    votefuns = [weighted_vote,  majority_vote]
-    bagging_unique_model(n_learners, epochs_lst, batch_size, votefuns, "cnn-bagging.txt")
-
-def test2():
-    # n_learners = 2
-    votefuns = [weighted_vote,  majority_vote]
-    # saved_model_files = ['saved_models/callback-save-30-0.77.hdf5', 'saved_models/callback-save-45-0.77.hdf5',
-    #        'saved_models/callback-save-60-0.78.hdf5']
-    # keras_cifar10_trained_model_4.h5
-    saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
-    n_learners = len(saved_model_files)
-    ensemble_loading_model(n_learners, saved_model_files, votefuns)
 
 def test3():
     n_learners = 5
@@ -284,7 +262,7 @@ def snapshot_ensemble(epochs, batch_size, M, alpha_zero):
 
 if __name__ == "__main__":
     print("Hello UW!")
-    test1() # bagging for three learners
+    # test1() # bagging for three learners
     # test2() # load saved models
     # test3() # bagging for five learners
 
@@ -301,7 +279,6 @@ if __name__ == "__main__":
     stack(saved_model_files)
     '''
     # snapshot cnn
-    '''
     epochs = 20
     M = 2
     alpha_zero = 0.0001
@@ -309,4 +286,3 @@ if __name__ == "__main__":
     # snapshot_ensemble(epochs, batch_size, M, alpha_zero)
     saved_model_files = ['weights/cnn-snapshot--1.h5', 'weights/cnn-snapshot--2.h5']
     stack(saved_model_files)
-    '''
