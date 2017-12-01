@@ -24,10 +24,7 @@ def load_data():
     print(x_test.shape[0], 'test samples')
     return (x_train, y_train), (x_test, y_test)
 
-
-# def preprocess(x_train, y_train, x_test, y_test, substract_pixel_mean=False):
-
-def preprocess(x_train, y_train, x_test, y_test, substract_pixel_mean):
+def preprocess(x_train, y_train, x_test, y_test, substract_pixel_mean = True):
     num_classes = 10
 
     # We assume data format "channels_last".
@@ -99,11 +96,10 @@ def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epoc
 
     # Prepare model model saving directory.
     save_dir = os.path.join(os.getcwd(), 'saved_models')
-    model_name = 'cifar10_resnet_model.{epoch:02d}.h5'
+    model_name = 'cifar10_resnet_model.h5'
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
     filepath = os.path.join(save_dir, model_name)
-    # filepath = model_type + "-{epoch:02d}-{val_acc:.2f}.hdf5"
     checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
 
     # Prepare callbacks for model saving and for learning rate adjustment.
@@ -118,7 +114,8 @@ def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epoc
             patience=5,
             min_lr=0.5e-6)
 
-    callbacks = [checkpoint, lr_reducer, lr_scheduler]
+    # callbacks = [checkpoint, lr_reducer, lr_scheduler]
+    callbacks = [lr_reducer, lr_scheduler]
 
     # callbacks  = snapshot.get_callbacks(model_prefix="ResNet-snap-") # try snapshot callback
 

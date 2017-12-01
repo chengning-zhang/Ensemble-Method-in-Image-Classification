@@ -338,10 +338,7 @@ def test1():
 def test2():
     # n_learners = 2
     votefuns = [weighted_vote,  majority_vote]
-    # saved_model_files = ['saved_models/callback-save-30-0.77.hdf5', 'saved_models/callback-save-45-0.77.hdf5',
-    #        'saved_models/callback-save-60-0.78.hdf5']
-    # keras_cifar10_trained_model_4.h5
-    saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
+    saved_model_files = ['saved_models/cifar10_resnet_model.01.h5', 'saved_models/cifar10_resnet_model.02.h5']
     n_learners = len(saved_model_files)
     bagging_loading_model(n_learners, saved_model_files, votefuns, "resnet-bagging.txt")
 
@@ -384,8 +381,8 @@ def snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epoch
 if __name__ == "__main__":
     print("Hello UW!")
     # # bagging
-    test1() # bagging for three learners
-    # test2() # load saved models
+    # test1() # bagging for three learners
+    test2() # load saved models
     # test3() # bagging for five learners
 
     '''
