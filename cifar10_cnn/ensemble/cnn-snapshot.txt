@@ -1,0 +1,17 @@
+--------------------------------------------
+Stack test accuracy: 0.616000
+learner 0 (model_file = snapshot_models/cnn-snapshot-1.h5): 0.543700
+learner 1 (model_file = snapshot_models/cnn-snapshot-2.h5): 0.626200
+--------------------------------------------
+Stack test accuracy: 0.634200
+learner 0 (model_file = snapshot_models/cnn-snapshot-1.h5): 0.569000
+learner 1 (model_file = snapshot_models/cnn-snapshot-2.h5): 0.646700
+--------------------------------------------
+Stack test accuracy: 0.635300
+learner 0 (model_file = snapshot_models/cnn-snapshot-1.h5): 0.566700
+learner 1 (model_file = snapshot_models/cnn-snapshot-2.h5): 0.648900
+--------------------------------------------
+Stack test accuracy: 0.591600
+learner 0 (model_file = snapshot_models/cnn-snapshot-1.h5): 0.566700
+learner 1 (model_file = snapshot_models/cnn-snapshot-2.h5): 0.516700
+learner 2 (model_file = snapshot_models/cnn-snapshot-3.h5): 0.542600

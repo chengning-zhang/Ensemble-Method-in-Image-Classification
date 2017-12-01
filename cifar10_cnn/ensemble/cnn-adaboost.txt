@@ -1,0 +1,15 @@
+--------------------------------------------
+ensemble test accuracy: 0.557600
+learner 0: 0.542900
+learner 1: 0.546900
+learner 2: 0.548900
+--------------------------------------------
+ensemble test accuracy: 0.563700
+learner 0: 0.533000
+learner 1: 0.547800
+learner 2: 0.548800
+--------------------------------------------
+ensemble test accuracy: 0.557500
+learner 0: 0.530600
+learner 1: 0.546100
+learner 2: 0.546800

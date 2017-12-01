@@ -1,0 +1,87 @@
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7fa600044aa0>
+ensemble test accuracy: 0.617400 
+learner 0 (model_file = saved_models/keras_cifar10_trained_model_4.h5): 0.587500
+learner 1 (model_file = saved_models/keras_cifar10_trained_model_6.h5): 0.622500
+votefun is
+<function majority_vote at 0x7fa600044b18>
+ensemble test accuracy: 0.619700 
+learner 0 (model_file = saved_models/keras_cifar10_trained_model_4.h5): 0.587500
+learner 1 (model_file = saved_models/keras_cifar10_trained_model_6.h5): 0.622500
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7f45c80b4cf8>
+ensemble test accuracy: 0.457400 
+learner 0 (epochs = 1): 0.441500
+learner 1 (epochs = 1): 0.434900
+learner 2 (epochs = 1): 0.452500
+votefun is
+<function majority_vote at 0x7f45c80b4d70>
+ensemble test accuracy: 0.453000 
+learner 0 (epochs = 1): 0.441500
+learner 1 (epochs = 1): 0.434900
+learner 2 (epochs = 1): 0.452500
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7f2ee00bbcf8>
+ensemble test accuracy: 0.451700 
+learner 0 (epochs = 1): 0.436300
+learner 1 (epochs = 1): 0.443900
+learner 2 (epochs = 1): 0.441300
+votefun is
+<function majority_vote at 0x7f2ee00bbd70>
+ensemble test accuracy: 0.451100 
+learner 0 (epochs = 1): 0.436300
+learner 1 (epochs = 1): 0.443900
+learner 2 (epochs = 1): 0.441300
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7feba80f3f50>
+ensemble test accuracy: 0.453500 
+learner 0 (epochs = 1): 0.448000
+learner 1 (epochs = 1): 0.432400
+learner 2 (epochs = 1): 0.442800
+votefun is
+<function majority_vote at 0x7feba807a050>
+ensemble test accuracy: 0.448600 
+learner 0 (epochs = 1): 0.448000
+learner 1 (epochs = 1): 0.432400
+learner 2 (epochs = 1): 0.442800
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7f75ac134f50>
+ensemble test accuracy: 0.617400 
+learner 0 (model_file = saved_models/keras_cifar10_trained_model_4.h5): 0.587500
+learner 1 (model_file = saved_models/keras_cifar10_trained_model_6.h5): 0.622500
+votefun is
+<function majority_vote at 0x7f75ac0ba050>
+ensemble test accuracy: 0.619700 
+learner 0 (model_file = saved_models/keras_cifar10_trained_model_4.h5): 0.587500
+learner 1 (model_file = saved_models/keras_cifar10_trained_model_6.h5): 0.622500
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7fc8ec0daf50>
+ensemble test accuracy: 0.980700 
+learner 0 (epochs = 1): 0.980700
+learner 1 (epochs = 1): 0.978400
+learner 2 (epochs = 1): 0.979300
+votefun is
+<function majority_vote at 0x7fc8ec0de050>
+ensemble test accuracy: 0.980400 
+learner 0 (epochs = 1): 0.980700
+learner 1 (epochs = 1): 0.978400
+learner 2 (epochs = 1): 0.979300
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7f6bdc109f50>
+ensemble test accuracy: 0.447300 
+learner 0 (epochs = 1): 0.419700
+learner 1 (epochs = 1): 0.432500
+learner 2 (epochs = 1): 0.436400
+votefun is
+<function majority_vote at 0x7f6bdc08f050>
+ensemble test accuracy: 0.442700 
+learner 0 (epochs = 1): 0.419700
+learner 1 (epochs = 1): 0.432500
+learner 2 (epochs = 1): 0.436400

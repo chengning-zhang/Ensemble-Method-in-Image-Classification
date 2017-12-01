@@ -1,0 +1,5 @@
+--------------------------------------------
+Stack test accuracy: 0.981000
+learner 0 (epochs = 1): 0.980200
+learner 1 (epochs = 1): 0.979300
+learner 2 (epochs = 1): 0.979700

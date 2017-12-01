@@ -1,0 +1,26 @@
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7f42dc479cf8>
+ensemble test accuracy: 0.981300 
+learner 0 (epochs = 1): 0.978500
+learner 1 (epochs = 1): 0.979500
+learner 2 (epochs = 1): 0.978900
+votefun is
+<function majority_vote at 0x7f42dc479d70>
+ensemble test accuracy: 0.980500 
+learner 0 (epochs = 1): 0.978500
+learner 1 (epochs = 1): 0.979500
+learner 2 (epochs = 1): 0.978900
+--------------------------------------------
+votefun is
+<function weighted_vote at 0x7f8a00113cf8>
+ensemble test accuracy: 0.988300 
+learner 0 (epochs = 5): 0.986800
+learner 1 (epochs = 5): 0.987300
+learner 2 (epochs = 5): 0.988000
+votefun is
+<function majority_vote at 0x7f8a00113d70>
+ensemble test accuracy: 0.987700 
+learner 0 (epochs = 5): 0.986800
+learner 1 (epochs = 5): 0.987300
+learner 2 (epochs = 5): 0.988000

@@ -1,0 +1,19 @@
+--------------------------------------------
+Stack test accuracy: 0.621100
+learner 0 (model_file = saved_models/cifar10_resnet_model.01.h5): 0.514500
+learner 1 (model_file = saved_models/cifar10_resnet_model.02.h5): 0.562600
+--------------------------------------------
+Stack test accuracy: 0.627100
+learner 0 (epochs = 1): 0.572300
+learner 1 (epochs = 1): 0.499500
+learner 2 (epochs = 1): 0.511800
+--------------------------------------------
+Stack test accuracy: 0.629600
+learner 0 (epochs = 1): 0.545500
+learner 1 (epochs = 1): 0.537600
+learner 2 (epochs = 1): 0.508300
+--------------------------------------------
+Stack test accuracy: 0.679600
+learner 0 (epochs = 2): 0.572800
+learner 1 (epochs = 2): 0.614900
+learner 2 (epochs = 2): 0.597200

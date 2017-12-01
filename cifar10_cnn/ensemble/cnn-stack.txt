@@ -1,0 +1,19 @@
+--------------------------------------------
+Stack test accuracy: 0.462000
+learner 0 (epochs = 1): 0.437000
+learner 1 (epochs = 1): 0.444200
+learner 2 (epochs = 1): 0.450400
+--------------------------------------------
+Stack test accuracy: 0.624700
+learner 0 (model_file = saved_models/keras_cifar10_trained_model_4.h5): 0.587500
+learner 1 (model_file = saved_models/keras_cifar10_trained_model_6.h5): 0.622500
+--------------------------------------------
+Stack test accuracy: 0.454200
+learner 0 (epochs = 1): 0.454300
+learner 1 (epochs = 1): 0.416500
+learner 2 (epochs = 1): 0.416800
+--------------------------------------------
+Stack test accuracy: 0.469400
+learner 0 (epochs = 1): 0.415600
+learner 1 (epochs = 1): 0.444300
+learner 2 (epochs = 1): 0.437800
