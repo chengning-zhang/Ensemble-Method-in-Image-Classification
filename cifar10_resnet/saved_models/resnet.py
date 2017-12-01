@@ -60,8 +60,8 @@ def prepare_data_for_resnet(substract_pixel_mean):
     print('y_train shape:', y_train.shape)
 
     # Convert class vectors to binary class matrices.
-    # y_train = keras.utils.to_categorical(y_train, num_classes)
-    # y_test = keras.utils.to_categorical(y_test, num_classes)
+    y_train = keras.utils.to_categorical(y_train, num_classes)
+    y_test = keras.utils.to_categorical(y_test, num_classes)
     return (x_train, y_train), (x_test, y_test), input_shape
 
 # build resnet model
@@ -71,8 +71,6 @@ def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epoc
     # M = 3
     # alpha_zero = 0.001
     # snapshot = SnapshotCallbackBuilder(T, M, alpha_zero)
-    y_train = keras.utils.to_categorical(y_train, num_classes)
-    y_test = keras.utils.to_categorical(y_test, num_classes)
 
     # Computed depth from supplied model parameter n
     depth = n * 6 + 2

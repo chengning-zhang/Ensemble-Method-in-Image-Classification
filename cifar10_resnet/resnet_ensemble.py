@@ -1,5 +1,6 @@
-from cnnmodel_build import *
-from data_preparation import *
+# from cnnmodel_build import *
+# from data_preparation import *
+from resnet import *
 from keras.models import load_model
 import numpy as np
 import sys
@@ -23,7 +24,8 @@ def weighted_vote(x_test, models, accuracy_records, num_classes=10):
     for i in range(n_learners):
         accuracy = accuracy_records[i]
         model = models[i]
-        probs = probs + accuracy*model.predict_proba(x_test)
+        # probs = probs + accuracy*model.predict_proba(x_test)
+        probs = probs + accuracy*model.predict(x_test)
     return np.argmax(probs, axis=1)
 
 def majority_vote(x_test, models, accuracy_records):
@@ -48,7 +50,7 @@ def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.
     ''' adaboost of multi classification'''
     num_classes = 10
     K = float(num_classes)
-    (x_train, y_train), (x_test, y_test) = load_data() #
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     y_train_old = y_train[:]
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
@@ -74,8 +76,7 @@ def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.
         model, history = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
         print("model " + str(i))
         predicts = predict(model, x_train_i)
-        # y_ref = y_train_old[train_picks, :].reshape((M, ))
-        y_ref = y_train_old[train_picks]  # mnist
+        y_ref = y_train_old[train_picks, :].reshape((M, ))
         num_error = np.count_nonzero(predicts - y_ref)
         error = float(num_error)/M
         w_changed = np.zeros(n_trains)
@@ -92,6 +93,7 @@ def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.
         test_accuracy_records.append(scores[1])
 
     final_predict = majority_vote(x_test, models, alphas)
+    print(final_predict.shape)
     errors = np.count_nonzero(final_predict.reshape((n_tests, )) - y_test_old.reshape((n_tests,)))
 
     filename = file_prefix + filename
@@ -131,10 +133,30 @@ def bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, filename="
     '''bagging, use unique model, can use multiple vote functions, votefuns are vote
        functions list
     '''
+    # Training parameters
+    batch_size = 64
+    epochs = 2
+    data_augmentation = True
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() #
+
+    # Subtracting pixel mean improves accuracy
+    n = 3
+
+    # Model version
+    # Orig paper: version = 1 (ResNet v1), Improved ResNet: version = 2 (ResNet v2)
+    version = 1
+    substract_pixel_mean = True
+    (x_train, y_train), (x_test, y_test), input_shape = prepare_data_for_resnet(substract_pixel_mean)
+    y_test_old = y_test[:] # save for error calculation
+    print(y_test_old.shape)
+    # model = build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
+
+    '''
+    num_classes = 10
+    (x_train, y_train), (x_test, y_test) = load_data()
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
+    '''
 
     models = []
     n_trains = x_train.shape[0]
@@ -147,7 +169,9 @@ def bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, filename="
         train_picks = np.random.choice(n_trains, n_trains)
         x_train_i = x_train[train_picks, :]
         y_train_i = y_train[train_picks, :]
-        model, history = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
+        # model, history = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
+        model, history = build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
+
         print("model %d finished" % (i))
         train_accuracy_records.append(history.history['acc'][-1])
         test_accuracy_records.append(history.history['val_acc'][-1])
@@ -160,7 +184,7 @@ def bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, filename="
     for votefun in votefuns:
         # get weighted vote or majority vote based on the votefun
         final_predict = votefun(x_test, models, train_accuracy_records)
-
+        print(final_predict.shape)
         errors = np.count_nonzero(final_predict.reshape((n_tests, )) - y_test_old.reshape((n_tests,)))
         out_file.write("votefun is\n")
         out_file.write(str(votefun) + "\n")
@@ -178,7 +202,7 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
        votefuns are vote functions list
     '''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() # 
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
 
@@ -221,7 +245,7 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
 def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filename="temp.txt"):
     '''stacking multiple saved models'''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() 
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
 
@@ -271,7 +295,7 @@ def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filena
 def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     '''stacking multiple saved models'''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() #
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     y_train_old = y_train[:]
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
@@ -328,7 +352,10 @@ def test1():
 def test2():
     # n_learners = 2
     votefuns = [weighted_vote,  majority_vote]
-    # saved_model_files = [] # need to change
+    # saved_model_files = ['saved_models/callback-save-30-0.77.hdf5', 'saved_models/callback-save-45-0.77.hdf5',
+    #        'saved_models/callback-save-60-0.78.hdf5']
+    # keras_cifar10_trained_model_4.h5
+    saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
     n_learners = len(saved_model_files)
     bagging_loading_model(n_learners, saved_model_files, votefuns, "cnn-bagging.txt")
 
@@ -369,7 +396,7 @@ def snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epoch
 if __name__ == "__main__":
     print("Hello UW!")
     # # bagging
-    # test1() # bagging for three learners
+    test1() # bagging for three learners
     # test2() # load saved models
     # test3() # bagging for five learners
 
@@ -383,7 +410,7 @@ if __name__ == "__main__":
     '''
 
     '''
-    # stack with saved models [DO NOT USE THIS]
+    # stack with saved models
     saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
     meta_epochs = 2
     stack_loading_model(saved_model_files, meta_epochs, filename="cnn-stack.txt")
@@ -398,11 +425,13 @@ if __name__ == "__main__":
     stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs, filename="cnn-stack.txt")
     '''
 
+    '''
     # snapshot cnn
-    epochs = 10
-    M = 2
-    alpha_zero = 0.001 # this is a bad choice
+    epochs = 5
+    M = 3
+    alpha_zero = 0.0001
     batch_size = 32
     name_prefix = "cnn-snapshot"
-    meta_epochs = 2
+    meta_epochs = 20
     snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs)
+    '''

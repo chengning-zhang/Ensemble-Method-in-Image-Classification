@@ -401,10 +401,10 @@ if __name__ == "__main__":
     '''
 
     # snapshot cnn
-    epochs = 10
-    M = 2
+    epochs = 5
+    M = 3
     alpha_zero = 0.0001
     batch_size = 32
     name_prefix = "cnn-snapshot"
-    meta_epochs = 2
+    meta_epochs = 20
     snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs)
