@@ -129,34 +129,18 @@ def diversity(x_data, y_data, y_data_old, model1, model2):
     diver = combined_acc - max(accuracy1, accuracy2)
     return diver
 
-def bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, filename="temp.txt", file_prefix=""):
+def bagging_train_model(version, n, n_learners, epochs_lst, batch_size, votefuns, filename="temp.txt", file_prefix=""):
     '''bagging, use unique model, can use multiple vote functions, votefuns are vote
        functions list
     '''
     # Training parameters
-    batch_size = 64
-    epochs = 2
     data_augmentation = True
     num_classes = 10
 
-    # Subtracting pixel mean improves accuracy
-    n = 3
-
-    # Model version
-    # Orig paper: version = 1 (ResNet v1), Improved ResNet: version = 2 (ResNet v2)
-    version = 1
     substract_pixel_mean = True
-    (x_train, y_train), (x_test, y_test), input_shape = prepare_data_for_resnet(substract_pixel_mean)
-    y_test_old = y_test[:] # save for error calculation
-    print(y_test_old.shape)
-    # model = build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
-
-    '''
-    num_classes = 10
     (x_train, y_train), (x_test, y_test) = load_data()
     y_test_old = y_test[:] # save for error calculation
-    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
-    '''
+    (x_train, y_train), (x_test, y_test), input_shape = preprocess(x_train, y_train, x_test, y_test, substract_pixel_mean)
 
     models = []
     n_trains = x_train.shape[0]
@@ -165,7 +149,7 @@ def bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, filename="
     test_accuracy_records = []
     for i in range(n_learners):
         epochs = epochs_lst[i]
-        model = build_model(x_train, num_classes)
+        # model = build_model(x_train, num_classes)
         train_picks = np.random.choice(n_trains, n_trains)
         x_train_i = x_train[train_picks, :]
         y_train_i = y_train[train_picks, :]
@@ -204,7 +188,7 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
     num_classes = 10
     (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
-    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
+    (x_train, y_train), (x_test, y_test), input_shape = preprocess(x_train, y_train, x_test, y_test)
 
     models = []
     n_trains = x_train.shape[0]
@@ -346,8 +330,10 @@ def test1():
     n_learners = 3
     batch_size = 32
     epochs_lst = [1, 1, 1]
+    version = 1
+    n = 3
     votefuns = [weighted_vote,  majority_vote]
-    bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, "cnn-bagging.txt")
+    bagging_train_model(version, n, n_learners, epochs_lst, batch_size, votefuns, "resnet-bagging.txt")
 
 def test2():
     # n_learners = 2
@@ -357,14 +343,16 @@ def test2():
     # keras_cifar10_trained_model_4.h5
     saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
     n_learners = len(saved_model_files)
-    bagging_loading_model(n_learners, saved_model_files, votefuns, "cnn-bagging.txt")
+    bagging_loading_model(n_learners, saved_model_files, votefuns, "resnet-bagging.txt")
 
 def test3():
     n_learners = 3
     batch_size = 32
     epochs_lst = [5, 5, 5]
+    version = 1
+    n = 3
     votefuns = [weighted_vote,  majority_vote]
-    bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, "cnn-bagging.txt")
+    bagging_train_model(version, n, n_learners, epochs_lst, batch_size, votefuns, "resnet-bagging.txt")
 
 def meta_model(n_learners, num_classes):
     # create model

@@ -17,9 +17,17 @@ import numpy as np
 import os
 import sys
 
-def prepare_data_for_resnet(substract_pixel_mean):
-    # Load the CIFAR10 data.
+def load_data():
+    # The data, shuffled and split between train and test sets:
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+    print(x_train.shape[0], 'train samples')
+    print(x_test.shape[0], 'test samples')
+    return (x_train, y_train), (x_test, y_test)
+
+
+# def preprocess(x_train, y_train, x_test, y_test, substract_pixel_mean=False):
+
+def preprocess(x_train, y_train, x_test, y_test, substract_pixel_mean):
     num_classes = 10
 
     # We assume data format "channels_last".
@@ -60,8 +68,8 @@ def prepare_data_for_resnet(substract_pixel_mean):
     print('y_train shape:', y_train.shape)
 
     # Convert class vectors to binary class matrices.
-    # y_train = keras.utils.to_categorical(y_train, num_classes)
-    # y_test = keras.utils.to_categorical(y_test, num_classes)
+    y_train = keras.utils.to_categorical(y_train, num_classes)
+    y_test = keras.utils.to_categorical(y_test, num_classes)
     return (x_train, y_train), (x_test, y_test), input_shape
 
 # build resnet model
@@ -71,8 +79,6 @@ def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epoc
     # M = 3
     # alpha_zero = 0.001
     # snapshot = SnapshotCallbackBuilder(T, M, alpha_zero)
-    y_train = keras.utils.to_categorical(y_train, num_classes)
-    y_test = keras.utils.to_categorical(y_test, num_classes)
 
     # Computed depth from supplied model parameter n
     depth = n * 6 + 2
@@ -182,6 +188,21 @@ def evaluate_resnet_model(model, x_test, y_test, verbose=1):
     print('Test loss:', scores[0])
     print('Test accuracy:', scores[1])
 
+def evaluate(model, x_test, y_test):
+    # Score trained model.
+    scores = model.evaluate(x_test, y_test, verbose=1)
+    print('Test loss:', scores[0])
+    print('Test accuracy:', scores[1])
+    return scores
+
+def predict(model, x_test):
+    test_classes = model.predict(x_test, verbose=0)
+    test_classes = np.argmax(test_classes, axis=1)
+    # print(test_classes.shape)
+    return test_classes
+
+
+
 # Model parameter
 # ----------------------------------------------------------------------------
 #           |      | 200-epoch | Orig Paper| 200-epoch | Orig Paper| sec/epoch
@@ -209,7 +230,7 @@ if __name__ == "__main__":
     # Orig paper: version = 1 (ResNet v1), Improved ResNet: version = 2 (ResNet v2)
     version = 1
     substract_pixel_mean = True
-    (x_train, y_train), (x_test, y_test), input_shape = prepare_data_for_resnet(substract_pixel_mean)
+    (x_train, y_train), (x_test, y_test), input_shape = preprocess(substract_pixel_mean)
     # model = build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
     # filename = "saved_models/cifar10_resnet_model.01.h5"
     # filename = "weights/ResNet-snap--6.h5"
