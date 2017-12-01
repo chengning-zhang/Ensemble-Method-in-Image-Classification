@@ -65,13 +65,13 @@ class SnapshotCallbackBuilder:
         Returns: list of 3 callbacks [ModelCheckpoint, LearningRateScheduler,
                  SnapshotModelCheckpoint] which can be provided to the 'fit' function
         """
-        if not os.path.exists('weights/'):
-            os.makedirs('weights/')
+        if not os.path.exists('snapshot_models/'):
+            os.makedirs('snapshot_models/')
 
-        callback_list = [callbacks.ModelCheckpoint("weights/%s-Best.h5" % model_prefix, monitor="val_acc",
+        callback_list = [callbacks.ModelCheckpoint("snapshot_models/%s-Best.h5" % model_prefix, monitor="val_acc",
                                                     save_best_only=True),
                          callbacks.LearningRateScheduler(schedule=self._cosine_anneal_schedule),
-                         SnapshotModelCheckpoint(self.T, self.M, fn_prefix='weights/%s' % model_prefix)]
+                         SnapshotModelCheckpoint(self.T, self.M, fn_prefix='snapshot_models/%s' % model_prefix)]
 
         return callback_list
 

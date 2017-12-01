@@ -371,9 +371,10 @@ def meta_model(n_learners, num_classes):
 
 def snapshot_train_model(version, n, epochs, batch_size, M, alpha_zero, name_prefix):
     num_classes = 10
+    data_augmentation = True
     (x_train, y_train), (x_test, y_test) = load_data()
-    (x_train, y_train), (x_test, y_test), input_size = preprocess(x_train, y_train, x_test, y_test)
-    model, history = build_resnet_snapshot(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
+    (x_train, y_train), (x_test, y_test), input_shape = preprocess(x_train, y_train, x_test, y_test)
+    build_resnet_snapshot(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, M, alpha_zero, name_prefix, data_augmentation)
     # model = build_model(x_train, num_classes)
     # train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, M, alpha_zero, name_prefix, data_augmentation=True)
 
@@ -383,7 +384,8 @@ def snapshot_ensemble(version, n, epochs, batch_size, M, alpha_zero, name_prefix
     for i in range(M):
         saved_model_files.append("snapshot_models/resnet-snapshot-" + str(i+1) + ".h5")
     print(saved_model_files)
-    stack_loading_model(saved_model_files, meta_epochs, filename="resnet-snapshot.txt")
+    # naming is more complicated than my thougtht
+    # stack_loading_model(saved_model_files, meta_epochs, filename="resnet-snapshot.txt")
 
 if __name__ == "__main__":
     print("Hello UW!")
@@ -412,22 +414,22 @@ if __name__ == "__main__":
 
     # stack with trained models
     n_learners = 3;
-    epochs_lst = [1, 1, 1];
+    epochs_lst = [2, 2, 2];
     batch_size = 32
     meta_epochs = 20
     version = 1
     n = 3
     stack_train_model(version, n, n_learners, epochs_lst, batch_size, meta_epochs, filename="resnet-stack.txt")
 
-'''
+    '''
     # snapshot cnn
     epochs = 5
     M = 3
     alpha_zero = 0.00001
     batch_size = 32
-    name_prefix = "cnn-snapshot"
+    name_prefix = "resnet-snapshot"
     meta_epochs = 20
     version = 1
     n = 3
     snapshot_ensemble(version, n, epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs)
-'''
+    '''
