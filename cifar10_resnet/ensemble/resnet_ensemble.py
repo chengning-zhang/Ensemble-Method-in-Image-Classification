@@ -228,12 +228,16 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
     out_file.close()
 
 
-def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filename="temp.txt"):
+def stack_train_model(version, n, n_learners, epochs_lst, batch_size, meta_epochs=40, filename="temp.txt"):
     '''stacking multiple saved models'''
+    # Training parameters
+    data_augmentation = True
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
+
+    substract_pixel_mean = True
+    (x_train, y_train), (x_test, y_test) = load_data()
     y_test_old = y_test[:] # save for error calculation
-    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
+    (x_train, y_train), (x_test, y_test), input_shape = preprocess(x_train, y_train, x_test, y_test, substract_pixel_mean)
 
     models = []
     n_trains = x_train.shape[0]
@@ -241,8 +245,9 @@ def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filena
     test_accuracy_records = []
     for i in range(n_learners):
         epochs = epochs_lst[i]
-        model = build_model(x_train, num_classes)
-        model, history = train(x_train, y_train, x_test, y_test, model, batch_size, epochs)
+        # model = build_model(x_train, num_classes)
+        # model, history = train(x_train, y_train, x_test, y_test, model, batch_size, epochs)
+        model, history = build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
         print("model %d finished" % (i))
         test_accuracy_records.append(history.history['val_acc'][-1])
         models.append(model) # save base learner
@@ -284,7 +289,7 @@ def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     y_train_old = y_train[:]
-    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
+    (x_train, y_train), (x_test, y_test), input_shape = preprocess(x_train, y_train, x_test, y_test)
 
     models = []
     n_trains = x_train.shape[0]
@@ -364,16 +369,16 @@ def meta_model(n_learners, num_classes):
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
 
-def snapshot_train_model(epochs, batch_size, M, alpha_zero, name_prefix):
+def snapshot_train_model(version, n, epochs, batch_size, M, alpha_zero, name_prefix):
     num_classes = 10
     (x_train, y_train), (x_test, y_test) = load_data()
-    y_test_old = y_test[:] # save for error calculation
-    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
-    model = build_model(x_train, num_classes)
-    train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, M, alpha_zero, name_prefix, data_augmentation=True)
+    (x_train, y_train), (x_test, y_test), input_size = preprocess(x_train, y_train, x_test, y_test)
+    model, history = build_resnet_snapshot(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
+    # model = build_model(x_train, num_classes)
+    # train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, M, alpha_zero, name_prefix, data_augmentation=True)
 
-def snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs):
-    snapshot_train_model(epochs, batch_size, M, alpha_zero, name_prefix)
+def snapshot_ensemble(version, n, epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs):
+    snapshot_train_model(version, n, epochs, batch_size, M, alpha_zero, name_prefix)
     saved_model_files = []
     for i in range(M):
         saved_model_files.append("snapshot_models/resnet-snapshot-" + str(i+1) + ".h5")
@@ -387,6 +392,7 @@ if __name__ == "__main__":
     # test2() # load saved models
     # test3() # bagging for five learners
 
+    '''
     # adaboost for multiple classification
     n_learners = 3
     epochs_lst = [1, 1, 1]
@@ -395,30 +401,33 @@ if __name__ == "__main__":
     version = 1
     n = 3
     adaboost(version, n, n_learners, epochs_lst, batch_size, sample_ratio, "resnet-adaboost.txt")
+    '''
 
     '''
     # stack with saved models
-    saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
+    saved_model_files = ['saved_models/cifar10_resnet_model.01.h5', 'saved_models/cifar10_resnet_model.02.h5']
     meta_epochs = 2
-    stack_loading_model(saved_model_files, meta_epochs, filename="cnn-stack.txt")
+    stack_loading_model(saved_model_files, meta_epochs, filename="resnet-stack.txt")
     '''
 
-    '''
     # stack with trained models
     n_learners = 3;
     epochs_lst = [1, 1, 1];
     batch_size = 32
     meta_epochs = 20
-    stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs, filename="cnn-stack.txt")
-    '''
+    version = 1
+    n = 3
+    stack_train_model(version, n, n_learners, epochs_lst, batch_size, meta_epochs, filename="resnet-stack.txt")
 
-    '''
+'''
     # snapshot cnn
     epochs = 5
     M = 3
-    alpha_zero = 0.0001
+    alpha_zero = 0.00001
     batch_size = 32
     name_prefix = "cnn-snapshot"
     meta_epochs = 20
-    snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs)
-    '''
+    version = 1
+    n = 3
+    snapshot_ensemble(version, n, epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs)
+'''
