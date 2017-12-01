@@ -48,7 +48,7 @@ def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.
     ''' adaboost of multi classification'''
     num_classes = 10
     K = float(num_classes)
-    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() #
     y_test_old = y_test[:] # save for error calculation
     y_train_old = y_train[:]
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
@@ -74,7 +74,8 @@ def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.
         model, history = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
         print("model " + str(i))
         predicts = predict(model, x_train_i)
-        y_ref = y_train_old[train_picks, :].reshape((M, ))
+        # y_ref = y_train_old[train_picks, :].reshape((M, ))
+        y_ref = y_train_old[train_picks]
         num_error = np.count_nonzero(predicts - y_ref)
         error = float(num_error)/M
         w_changed = np.zeros(n_trains)
@@ -131,7 +132,7 @@ def bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, filename="
        functions list
     '''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() #
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
 
@@ -177,7 +178,7 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
        votefuns are vote functions list
     '''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() # 
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
 
@@ -220,7 +221,7 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
 def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filename="temp.txt"):
     '''stacking multiple saved models'''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() 
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
 
@@ -270,7 +271,7 @@ def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filena
 def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     '''stacking multiple saved models'''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() #
     y_test_old = y_test[:] # save for error calculation
     y_train_old = y_train[:]
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
@@ -327,10 +328,7 @@ def test1():
 def test2():
     # n_learners = 2
     votefuns = [weighted_vote,  majority_vote]
-    # saved_model_files = ['saved_models/callback-save-30-0.77.hdf5', 'saved_models/callback-save-45-0.77.hdf5',
-    #        'saved_models/callback-save-60-0.78.hdf5']
-    # keras_cifar10_trained_model_4.h5
-    saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
+    # saved_model_files = [] # need to change
     n_learners = len(saved_model_files)
     bagging_loading_model(n_learners, saved_model_files, votefuns, "cnn-bagging.txt")
 
@@ -385,7 +383,7 @@ if __name__ == "__main__":
     '''
 
     '''
-    # stack with saved models
+    # stack with saved models [DO NOT USE THIS]
     saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
     meta_epochs = 2
     stack_loading_model(saved_model_files, meta_epochs, filename="cnn-stack.txt")
@@ -403,7 +401,7 @@ if __name__ == "__main__":
     # snapshot cnn
     epochs = 10
     M = 2
-    alpha_zero = 0.0001
+    alpha_zero = 0.001 # this is a bad choice
     batch_size = 32
     name_prefix = "cnn-snapshot"
     meta_epochs = 2
