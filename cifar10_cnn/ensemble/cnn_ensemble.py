@@ -48,7 +48,7 @@ def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.
     ''' adaboost of multi classification'''
     num_classes = 10
     K = float(num_classes)
-    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     y_train_old = y_train[:]
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
@@ -131,7 +131,7 @@ def bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, filename="
        functions list
     '''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
 
@@ -177,7 +177,7 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
        votefuns are vote functions list
     '''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
 
@@ -220,7 +220,7 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
 def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filename="temp.txt"):
     '''stacking multiple saved models'''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
 
@@ -270,7 +270,7 @@ def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filena
 def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     '''stacking multiple saved models'''
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data() # cifar-10
     y_test_old = y_test[:] # save for error calculation
     y_train_old = y_train[:]
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
@@ -352,14 +352,21 @@ def meta_model(n_learners, num_classes):
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
 
-# def train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, M, alpha_zero, data_augmentation=True):
-def snapshot_ensemble(epochs, batch_size, M, alpha_zero):
+def snapshot_train_model(epochs, batch_size, M, alpha_zero, name_prefix):
     num_classes = 10
-    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    (x_train, y_train), (x_test, y_test) = load_data()
     y_test_old = y_test[:] # save for error calculation
     (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
     model = build_model(x_train, num_classes)
-    train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, M, alpha_zero, data_augmentation=True)
+    train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, M, alpha_zero, name_prefix, data_augmentation=True)
+
+def snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs):
+    snapshot_train_model(epochs, batch_size, M, alpha_zero, name_prefix)
+    saved_model_files = []
+    for i in range(M):
+        saved_model_files.append("snapshot_models/cnn-snapshot-" + str(i+1) + ".h5")
+    print(saved_model_files)
+    stack_loading_model(saved_model_files, meta_epochs, filename="cnn-snapshot.txt")
 
 if __name__ == "__main__":
     print("Hello UW!")
@@ -384,20 +391,22 @@ if __name__ == "__main__":
     stack_loading_model(saved_model_files, meta_epochs, filename="cnn-stack.txt")
     '''
 
+    '''
     # stack with trained models
     n_learners = 3;
     epochs_lst = [1, 1, 1];
     batch_size = 32
     meta_epochs = 2
     stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs, filename="cnn-stack.txt")
+    '''
 
     # snapshot cnn
     '''
-    epochs = 20
+    epochs = 10
     M = 2
     alpha_zero = 0.0001
     batch_size = 32
-    # snapshot_ensemble(epochs, batch_size, M, alpha_zero)
-    saved_model_files = ['weights/cnn-snapshot--1.h5', 'weights/cnn-snapshot--2.h5']
-    stack(saved_model_files)
+    name_prefix = "cnn-snapshot"
+    meta_epochs = 2
+    snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs)
     '''

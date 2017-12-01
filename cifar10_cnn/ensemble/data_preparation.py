@@ -2,7 +2,7 @@ import keras
 from keras.datasets import cifar10
 import numpy as np
 
-def load_cifar10():
+def load_data():
     # The data, shuffled and split between train and test sets:
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
     print(x_train.shape[0], 'train samples')
