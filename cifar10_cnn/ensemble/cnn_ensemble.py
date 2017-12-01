@@ -217,6 +217,56 @@ def bagging_loading_model(n_learners, saved_model_files, votefuns, filename="tem
     out_file.close()
 
 
+def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filename="temp.txt"):
+    '''stacking multiple saved models'''
+    num_classes = 10
+    (x_train, y_train), (x_test, y_test) = load_cifar10() # cifar-10
+    y_test_old = y_test[:] # save for error calculation
+    (x_train, y_train), (x_test, y_test) = preprocess(x_train, y_train, x_test, y_test)
+
+    models = []
+    n_trains = x_train.shape[0]
+    n_tests = x_test.shape[0]
+    test_accuracy_records = []
+    for i in range(n_learners):
+        epochs = epochs_lst[i]
+        model = build_model(x_train, num_classes)
+        model, history = train(x_train, y_train, x_test, y_test, model, batch_size, epochs)
+        print("model %d finished" % (i))
+        test_accuracy_records.append(history.history['val_acc'][-1])
+        models.append(model) # save base learner
+
+    # construct meta learning problem
+    meta_x_train = np.zeros((n_trains, n_learners*num_classes), dtype="float32")
+    meta_x_test = np.zeros((n_tests, n_learners*num_classes), dtype="float32")
+    for i in range(n_learners):
+        meta_x_train[:, i*num_classes:i*num_classes + num_classes] = models[i].predict(x_train, verbose=0)
+        meta_x_test[:, i*num_classes:i*num_classes + num_classes] = models[i].predict(x_test, verbose=0)
+    meta_y_train = y_train # use one hot encode
+    meta_y_test = y_test
+    super_model = meta_model(n_learners, num_classes)
+    # callbacks
+    save_dir = os.path.join(os.getcwd(), 'stacking_models')
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+    model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    filepath = os.path.join(save_dir, model_name)
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
+    callbacks_list = [checkpoint]
+
+    super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=meta_epochs, validation_data=(meta_x_test, meta_y_test), shuffle=True, callbacks=callbacks_list)
+    scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
+    print(filename)
+    out_file = open(filename, "a")
+    out_file.write("--------------------------------------------\n")
+    print('Stack test accuracy: ', scores[1])
+    out_file.write('Stack test accuracy: %0.6f\n' % (scores[1]))
+    for i in range(n_learners):
+        print("learner %d (epochs = %d): %0.6f" % (i, epochs_lst[i], test_accuracy_records[i]))
+        out_file.write("learner %d (epochs = %d): %0.6f\n" % (i, epochs_lst[i], test_accuracy_records[i]))
+    out_file.close()
+
+
 def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     '''stacking multiple saved models'''
     num_classes = 10
@@ -260,8 +310,8 @@ def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     print(filename)
     out_file = open(filename, "a")
     out_file.write("--------------------------------------------\n")
-    print('Test accuracy: ', scores[1])
-    out_file.write('Test accuracy: %0.6f\n' % (scores[1]))
+    print('Stack test accuracy: ', scores[1])
+    out_file.write('Stack test accuracy: %0.6f\n' % (scores[1]))
     for i in range(n_learners):
         print("learner %d (model_file = %s): %0.6f" % (i, saved_model_files[i], test_accuracy_records[i]))
         out_file.write("learner %d (model_file = %s): %0.6f\n" % (i, saved_model_files[i], test_accuracy_records[i]))
@@ -313,9 +363,11 @@ def snapshot_ensemble(epochs, batch_size, M, alpha_zero):
 
 if __name__ == "__main__":
     print("Hello UW!")
+    # # bagging
     # test1() # bagging for three learners
     # test2() # load saved models
     # test3() # bagging for five learners
+
     '''
     # adaboost for multiple classification
     n_learners = 3
@@ -324,10 +376,21 @@ if __name__ == "__main__":
     sample_ratio = 3
     adaboost(n_learners, epochs_lst, batch_size, sample_ratio, "cnn-adaboost.txt")
     '''
+
+    '''
     # stack with saved models
     saved_model_files = ['saved_models/keras_cifar10_trained_model_4.h5', 'saved_models/keras_cifar10_trained_model_6.h5']
     meta_epochs = 2
     stack_loading_model(saved_model_files, meta_epochs, filename="cnn-stack.txt")
+    '''
+
+    # stack with trained models
+    n_learners = 3;
+    epochs_lst = [1, 1, 1];
+    batch_size = 32
+    meta_epochs = 2
+    stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs, filename="cnn-stack.txt")
+
     # snapshot cnn
     '''
     epochs = 20
