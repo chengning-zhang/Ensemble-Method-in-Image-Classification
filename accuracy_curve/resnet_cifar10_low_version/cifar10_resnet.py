@@ -23,7 +23,7 @@ from keras.models import Model
 from keras.datasets import cifar10
 import numpy as np
 import os
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import sys
 
 # Training parameters
@@ -413,6 +413,7 @@ else:
 scores = model.evaluate(x_test, y_test, verbose=1)
 print('Test loss:', scores[0])
 print('Test accuracy:', scores[1])
+'''
 plt.plot(history.history['acc'])
 plt.plot(history.history['val_acc'])
 plt.title('model accuracy')
@@ -420,3 +421,4 @@ plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.savefig('resnet-v%d-n%d.png' % (version, n))
+'''

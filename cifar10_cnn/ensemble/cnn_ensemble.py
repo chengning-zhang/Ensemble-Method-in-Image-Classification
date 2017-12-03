@@ -378,10 +378,8 @@ if __name__ == "__main__":
     # test3() # bagging for five learners
 
     # adaboost for multiple classification
-    # n_learners = 5
-    # epochs_lst = [20, 20, 20, 20, 20]
-    n_learners = 3
-    epochs_lst = [1, 1, 1]
+    n_learners = 5
+    epochs_lst = [20, 20, 20, 20, 20]
     batch_size = 32
     sample_ratio = 3
     adaboost(n_learners, epochs_lst, batch_size, sample_ratio, "cnn-adaboost.txt")
