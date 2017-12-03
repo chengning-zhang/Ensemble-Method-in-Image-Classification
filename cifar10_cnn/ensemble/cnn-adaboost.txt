@@ -27,3 +27,11 @@ ensemble test accuracy: 0.550200
 learner 0 (epochs = 1): 0.525800
 learner 1 (epochs = 1): 0.551500
 learner 2 (epochs = 1): 0.522600
+--------------------------------------------
+sample ratio: 3.000000
+ensemble test accuracy: 0.809900
+learner 0 (epochs = 20): 0.785300
+learner 1 (epochs = 20): 0.785600
+learner 2 (epochs = 20): 0.781500
+learner 3 (epochs = 20): 0.775700
+learner 4 (epochs = 20): 0.780600

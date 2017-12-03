@@ -74,7 +74,7 @@ def adaboost(version, n, n_learners, epochs_lst, batch_size, sample_ratio=3, fil
 
         x_train_i = x_train[train_picks, :]
         y_train_i = y_train[train_picks, :]
-        model, history = build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
+        model, history = build_resnet(x_train_i, y_train_i, x_test, y_test, input_shape, batch_size, epochs, num_classes, n, version, data_augmentation)
         # model, history = train(x_train_i, y_train_i, x_test, y_test, model, batch_size, epochs)
         print("model " + str(i))
         predicts = predict(model, x_train_i)
@@ -337,7 +337,7 @@ def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
 def test1():
     n_learners = 3
     batch_size = 32
-    epochs_lst = [1, 1, 1]
+    epochs_lst = [120, 120, 120]
     version = 1
     n = 3
     votefuns = [weighted_vote,  majority_vote]
@@ -388,13 +388,37 @@ def snapshot_ensemble(version, n, epochs, batch_size, M, alpha_zero, name_prefix
     # naming is more complicated than my thougtht
     # stack_loading_model(saved_model_files, meta_epochs, filename="resnet-snapshot.txt")
 
+def adaboost_test():
+    n_learners = 3
+    epochs_lst = [40, 40, 40]
+    batch_size = 32
+    sample_ratio = 3
+    version = 1
+    n = 3
+    adaboost(version, n, n_learners, epochs_lst, batch_size, sample_ratio, "resnet-adaboost.txt")
+
+def stack_test():
+    n_learners = 3
+    epochs_lst = [120, 120, 120]
+    batch_size = 32
+    meta_epochs = 100
+    version = 1
+    n = 3
+    stack_train_model(version, n, n_learners, epochs_lst, batch_size, meta_epochs, filename="resnet-stack.txt")
+
 if __name__ == "__main__":
     print("Hello UW!")
     # # bagging
     # test1() # bagging for three learners
     # test2() # load saved models
     # test3() # bagging for five learners
+    n = int(sys.argv[1])
+    if n == 1:
+        adaboost_test()
+    else:
+        stack_test()
 
+    '''
     # adaboost for multiple classification
     n_learners = 3
     epochs_lst = [1, 1, 1]
@@ -403,6 +427,7 @@ if __name__ == "__main__":
     version = 1
     n = 3
     adaboost(version, n, n_learners, epochs_lst, batch_size, sample_ratio, "resnet-adaboost.txt")
+    '''
 
     '''
     # stack with saved models

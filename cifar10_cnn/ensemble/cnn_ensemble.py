@@ -377,12 +377,14 @@ if __name__ == "__main__":
     # test2() # load saved models
     # test3() # bagging for five learners
 
+    '''
     # adaboost for multiple classification
     n_learners = 5
     epochs_lst = [20, 20, 20, 20, 20]
     batch_size = 32
     sample_ratio = 3
     adaboost(n_learners, epochs_lst, batch_size, sample_ratio, "cnn-adaboost.txt")
+    '''
 
     '''
     # stack with saved models
@@ -391,14 +393,12 @@ if __name__ == "__main__":
     stack_loading_model(saved_model_files, meta_epochs, filename="cnn-stack.txt")
     '''
 
-    '''
     # stack with trained models
-    n_learners = 3;
-    epochs_lst = [1, 1, 1];
+    n_learners = 5;
+    epochs_lst = [40, 40, 40, 40, 40];
     batch_size = 32
-    meta_epochs = 20
+    meta_epochs = 50
     stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs, filename="cnn-stack.txt")
-    '''
 
     '''
     # snapshot cnn
