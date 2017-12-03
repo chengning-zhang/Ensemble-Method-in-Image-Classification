@@ -205,10 +205,18 @@ def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epoc
     checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
 
     # Prepare callbacks for model saving and for learning rate adjustment.
+    '''
     checkpoint = ModelCheckpoint(filepath=filepath,
                                   monitor='val_acc',
                                   verbose=1,
                                   save_best_only=True)
+    '''
+    checkpoint = ModelCheckpoint(filepath=filepath,
+            monitor='val_acc',
+            verbose=1,
+            save_best_only=True,
+            save_weights_only=True)
+
     lr_scheduler = LearningRateScheduler(lr_schedule)
 
     lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1),
@@ -216,8 +224,8 @@ def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epoc
             patience=5,
             min_lr=0.5e-6)
 
-    # callbacks = [checkpoint, lr_reducer, lr_scheduler]
-    callbacks = [lr_reducer, lr_scheduler]
+    callbacks = [checkpoint, lr_reducer, lr_scheduler]
+    # callbacks = [lr_reducer, lr_scheduler]
 
     # callbacks  = snapshot.get_callbacks(model_prefix="ResNet-snap-") # try snapshot callback
 
@@ -266,6 +274,7 @@ def build_resnet(x_train, y_train, x_test, y_test, input_shape, batch_size, epoc
                 validation_data=(x_test, y_test),
                 epochs=epochs, verbose=1, workers=4,
                 callbacks=callbacks)
+        model.load_weights(filepath)
 
     '''
     # Score trained model.

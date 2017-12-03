@@ -76,11 +76,16 @@ def train_snapshot(x_train, y_train, x_test, y_test, model, batch_size, epochs, 
         return model
 
 def train(x_train, y_train, x_test, y_test, model, batch_size, epochs, data_augmentation=True):
+    filepath="saved_models/best_model.hdf5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=True)
+    callbacks_list = [checkpoint]
     history = model.fit(x_train, y_train,
         batch_size=batch_size,
         epochs=epochs,
         verbose=1,
-        validation_data=(x_test, y_test))
+        validation_data=(x_test, y_test)
+        callbacks=callbacks_list)
+    model.load_weights(filepath)
     return model, history
 
 def evaluate(model, x_test, y_test):

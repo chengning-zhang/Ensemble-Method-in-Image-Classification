@@ -251,12 +251,14 @@ def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filena
     save_dir = os.path.join(os.getcwd(), 'stacking_models')
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    # model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    model_name = "best_stack.hdf5"
     filepath = os.path.join(save_dir, model_name)
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=True)
     callbacks_list = [checkpoint]
 
     super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=meta_epochs, validation_data=(meta_x_test, meta_y_test), shuffle=True, callbacks=callbacks_list)
+    super_model.load_weights(filepath)
     scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
     print(filename)
     out_file = open(filename, "a")
@@ -302,12 +304,14 @@ def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     save_dir = os.path.join(os.getcwd(), 'stacking_models')
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    # model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    model_name="stack_best.hdf5"
     filepath = os.path.join(save_dir, model_name)
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=True)
     callbacks_list = [checkpoint]
 
     super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=meta_epochs, validation_data=(meta_x_test, meta_y_test), shuffle=True, callbacks=callbacks_list)
+    super_model.load_weights(filepath)
     scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
     print(filename)
     out_file = open(filename, "a")
@@ -370,12 +374,21 @@ def snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epoch
     print(saved_model_files)
     stack_loading_model(saved_model_files, meta_epochs, filename="cnn-snapshot.txt")
 
+def stack_test():
+    n_learners = 5;
+    epochs_lst = [100, 100, 100, 100, 100];
+    batch_size = 32
+    meta_epochs = 150
+    stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs, filename="cnn-stack.txt")
+
 if __name__ == "__main__":
     print("Hello UW!")
     # # bagging
     # test1() # bagging for three learners
     # test2() # load saved models
     # test3() # bagging for five learners
+    
+    stack_test()
 
     '''
     # adaboost for multiple classification
@@ -393,12 +406,14 @@ if __name__ == "__main__":
     stack_loading_model(saved_model_files, meta_epochs, filename="cnn-stack.txt")
     '''
 
+    '''
     # stack with trained models
     n_learners = 5;
-    epochs_lst = [40, 40, 40, 40, 40];
+    epochs_lst = [100, 100, 100, 100, 100];
     batch_size = 32
-    meta_epochs = 50
+    meta_epochs = 150
     stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs, filename="cnn-stack.txt")
+    '''
 
     '''
     # snapshot cnn

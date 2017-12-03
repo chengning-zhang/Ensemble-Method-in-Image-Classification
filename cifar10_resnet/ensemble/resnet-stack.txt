@@ -17,3 +17,18 @@ Stack test accuracy: 0.679600
 learner 0 (epochs = 2): 0.572800
 learner 1 (epochs = 2): 0.614900
 learner 2 (epochs = 2): 0.597200
+--------------------------------------------
+Stack test accuracy: 0.895600
+learner 0 (epochs = 120): 0.870600
+learner 1 (epochs = 120): 0.875400
+learner 2 (epochs = 120): 0.872600
+--------------------------------------------
+Stack test accuracy: 0.902700
+learner 0 (epochs = 150): 0.879300
+learner 1 (epochs = 150): 0.881000
+learner 2 (epochs = 150): 0.878400
+--------------------------------------------
+Stack test accuracy: 0.624100
+learner 0 (epochs = 1): 0.508000
+learner 1 (epochs = 1): 0.510200
+learner 2 (epochs = 1): 0.576500

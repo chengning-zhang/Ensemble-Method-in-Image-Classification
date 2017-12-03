@@ -252,12 +252,14 @@ def stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs=40, filena
     save_dir = os.path.join(os.getcwd(), 'stacking_models')
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    # model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    model_name="stack_best.hdf5"
     filepath = os.path.join(save_dir, model_name)
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True,save_weights_only=True)
     callbacks_list = [checkpoint]
 
     super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=meta_epochs, validation_data=(meta_x_test, meta_y_test), shuffle=True, callbacks=callbacks_list)
+    super_model.load_weights(filepath)
     scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
     print(filename)
     out_file = open(filename, "a")
@@ -303,12 +305,14 @@ def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     save_dir = os.path.join(os.getcwd(), 'stacking_models')
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    # model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    model_name="stack_best.hdf5"
     filepath = os.path.join(save_dir, model_name)
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True,save_weights_only=True)
     callbacks_list = [checkpoint]
 
     super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=meta_epochs, validation_data=(meta_x_test, meta_y_test), shuffle=True, callbacks=callbacks_list)
+    super_model.load(filepath)
     scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
     print(filename)
     out_file = open(filename, "a")

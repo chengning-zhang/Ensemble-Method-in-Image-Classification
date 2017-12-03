@@ -266,12 +266,14 @@ def stack_train_model(version, n, n_learners, epochs_lst, batch_size, meta_epoch
     save_dir = os.path.join(os.getcwd(), 'stacking_models')
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    # model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    model_name = "best_stack.hdf5"
     filepath = os.path.join(save_dir, model_name)
-    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=True)
     callbacks_list = [checkpoint]
 
     super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=meta_epochs, validation_data=(meta_x_test, meta_y_test), shuffle=True, callbacks=callbacks_list)
+    super_model.load_weights(filepath)
     scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
     print(filename)
     out_file = open(filename, "a")
@@ -317,12 +319,14 @@ def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     save_dir = os.path.join(os.getcwd(), 'stacking_models')
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    # model_name="stack-{epoch:03d}-{val_acc:.4f}.hdf5"
+    model_name = "best_stack.hdf5"
     filepath = os.path.join(save_dir, model_name)
     checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True)
     callbacks_list = [checkpoint]
 
     super_model.fit(meta_x_train, meta_y_train, batch_size=128, epochs=meta_epochs, validation_data=(meta_x_test, meta_y_test), shuffle=True, callbacks=callbacks_list)
+    super_model.load_weights(filepath);
     scores = super_model.evaluate(meta_x_test, meta_y_test, verbose=1)
     print(filename)
     out_file = open(filename, "a")
@@ -389,8 +393,11 @@ def snapshot_ensemble(version, n, epochs, batch_size, M, alpha_zero, name_prefix
     # stack_loading_model(saved_model_files, meta_epochs, filename="resnet-snapshot.txt")
 
 def adaboost_test():
+    # n_learners = 3
+    # epochs_lst = [2, 2, 2]
+    # sample_ratio = 1
     n_learners = 3
-    epochs_lst = [40, 40, 40]
+    epochs_lst = [80, 80, 80]
     batch_size = 32
     sample_ratio = 3
     version = 1
@@ -399,9 +406,12 @@ def adaboost_test():
 
 def stack_test():
     n_learners = 3
-    epochs_lst = [120, 120, 120]
+    epochs_lst = [200, 200, 200]
+    # n_learners = 3
+    # epochs_lst = [1, 1, 1]
+    # meta_epochs = 20
     batch_size = 32
-    meta_epochs = 100
+    meta_epochs = 200
     version = 1
     n = 3
     stack_train_model(version, n, n_learners, epochs_lst, batch_size, meta_epochs, filename="resnet-stack.txt")
