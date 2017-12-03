@@ -102,13 +102,14 @@ def adaboost(version, n, n_learners, epochs_lst, batch_size, sample_ratio=3, fil
     print(filename)
     out_file = open(filename, "a")
     out_file.write("--------------------------------------------\n")
-
+    print('sample ratio = %f' % (sample_ratio))
     print('ensemble test accuracy: %f' % ((n_tests - errors)/float(n_tests)))
+    out_file.write('sample ratio = %f\n' % (sample_ratio))
     out_file.write('ensemble test accuracy: %f\n' % ((n_tests - errors)/float(n_tests)))
 
     for i in range(n_learners):
-        print("learner %d: %0.6f" % (i, test_accuracy_records[i]))
-        out_file.write("learner %d: %0.6f\n" % (i, test_accuracy_records[i]))
+        print("learner %d (epochs = %d): %0.6f" % (i, epochs_lst[i], test_accuracy_records[i]))
+        out_file.write("learner %d (epochs = %d): %0.6f\n" % (i, epochs_lst[i], test_accuracy_records[i]))
     out_file.close()
     ## check diversity
     # for i in range(n_learners):
@@ -394,7 +395,6 @@ if __name__ == "__main__":
     # test2() # load saved models
     # test3() # bagging for five learners
 
-    '''
     # adaboost for multiple classification
     n_learners = 3
     epochs_lst = [1, 1, 1]
@@ -403,7 +403,6 @@ if __name__ == "__main__":
     version = 1
     n = 3
     adaboost(version, n, n_learners, epochs_lst, batch_size, sample_ratio, "resnet-adaboost.txt")
-    '''
 
     '''
     # stack with saved models
@@ -412,6 +411,7 @@ if __name__ == "__main__":
     stack_loading_model(saved_model_files, meta_epochs, filename="resnet-stack.txt")
     '''
 
+    '''
     # stack with trained models
     n_learners = 3;
     epochs_lst = [2, 2, 2];
@@ -420,6 +420,7 @@ if __name__ == "__main__":
     version = 1
     n = 3
     stack_train_model(version, n, n_learners, epochs_lst, batch_size, meta_epochs, filename="resnet-stack.txt")
+    '''
 
     '''
     # snapshot cnn

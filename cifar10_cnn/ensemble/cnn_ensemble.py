@@ -98,12 +98,14 @@ def adaboost(n_learners, epochs_lst, batch_size, sample_ratio=3, filename="temp.
     out_file = open(filename, "a")
     out_file.write("--------------------------------------------\n")
 
+    print("sample ratio: %f" % (sample_ratio))
     print('ensemble test accuracy: %f' % ((n_tests - errors)/float(n_tests)))
+    out_file.write('sample ratio: %f\n' % (sample_ratio))
     out_file.write('ensemble test accuracy: %f\n' % ((n_tests - errors)/float(n_tests)))
 
     for i in range(n_learners):
-        print("learner %d: %0.6f" % (i, test_accuracy_records[i]))
-        out_file.write("learner %d: %0.6f\n" % (i, test_accuracy_records[i]))
+        print("learner %d (epochs = %d): %0.6f" % (i, epochs_lst[i], test_accuracy_records[i]))
+        out_file.write("learner %d (epochs = %d): %0.6f\n" % (i, epochs_lst[i], test_accuracy_records[i]))
     out_file.close()
     ## check diversity
     # for i in range(n_learners):
@@ -318,9 +320,9 @@ def stack_loading_model(saved_model_files, meta_epochs=40, filename="temp.txt"):
     out_file.close()
 
 def test1():
-    n_learners = 3
+    n_learners = 5
     batch_size = 32
-    epochs_lst = [1, 1, 1]
+    epochs_lst = [40, 40, 40, 40, 40]
     votefuns = [weighted_vote,  majority_vote]
     bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, "cnn-bagging.txt")
 
@@ -335,9 +337,9 @@ def test2():
     bagging_loading_model(n_learners, saved_model_files, votefuns, "cnn-bagging.txt")
 
 def test3():
-    n_learners = 3
+    n_learners = 5
     batch_size = 32
-    epochs_lst = [5, 5, 5]
+    epochs_lst = [40, 40, 40, 40, 40]
     votefuns = [weighted_vote,  majority_vote]
     bagging_train_model(n_learners, epochs_lst, batch_size, votefuns, "cnn-bagging.txt")
 
@@ -375,14 +377,14 @@ if __name__ == "__main__":
     # test2() # load saved models
     # test3() # bagging for five learners
 
-    '''
     # adaboost for multiple classification
+    # n_learners = 5
+    # epochs_lst = [20, 20, 20, 20, 20]
     n_learners = 3
     epochs_lst = [1, 1, 1]
     batch_size = 32
     sample_ratio = 3
     adaboost(n_learners, epochs_lst, batch_size, sample_ratio, "cnn-adaboost.txt")
-    '''
 
     '''
     # stack with saved models
@@ -400,6 +402,7 @@ if __name__ == "__main__":
     stack_train_model(n_learners, epochs_lst, batch_size, meta_epochs, filename="cnn-stack.txt")
     '''
 
+    '''
     # snapshot cnn
     epochs = 5
     M = 3
@@ -408,3 +411,4 @@ if __name__ == "__main__":
     name_prefix = "cnn-snapshot"
     meta_epochs = 20
     snapshot_ensemble(epochs, batch_size, M, alpha_zero, name_prefix, meta_epochs)
+    '''
