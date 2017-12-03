@@ -18,7 +18,7 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 # from keras.callbacks import ReduceLROnPlateau
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2
-from keras import backend as K
+# from keras import backend as K
 from keras.models import Model
 from keras.datasets import cifar10
 import numpy as np
@@ -75,6 +75,7 @@ img_rows = x_train.shape[1]
 img_cols = x_train.shape[2]
 channels = x_train.shape[3]
 
+'''
 if K.image_data_format() == 'channels_first':
     img_rows = x_train.shape[2]
     img_cols = x_train.shape[3]
@@ -89,6 +90,13 @@ else:
     x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, channels)
     x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, channels)
     input_shape = (img_rows, img_cols, channels)
+'''
+img_rows = x_train.shape[1]
+img_cols = x_train.shape[2]
+channels = x_train.shape[3]
+x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, channels)
+x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, channels)
+input_shape = (img_rows, img_cols, channels)
 
 # Normalize data.
 x_train = x_train.astype('float32') / 255
